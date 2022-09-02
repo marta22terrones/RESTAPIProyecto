@@ -3,6 +3,9 @@ package com.proyecto.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.dao.IFilmDao;
@@ -58,5 +61,15 @@ public class FilmServiceImpl implements IFilmService {
     @Override
     public List<Film> getFilmByString(String string) {
         return filmDao.getFilmByString(string);
+    }
+
+    @Override
+    public List<Film> findAll(Sort sort) {
+        return filmDao.findAll(sort);
+    }
+
+    @Override
+    public Page<Film> findAll(Pageable pageable) {
+        return filmDao.findAll(pageable);
     }
 }

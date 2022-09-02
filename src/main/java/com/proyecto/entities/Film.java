@@ -34,6 +34,8 @@ import lombok.Setter;
 @Builder
 public class Film implements Serializable {
 
+    private static final long SerialVersionUID = 1L; //
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

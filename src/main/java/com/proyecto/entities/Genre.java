@@ -30,6 +30,8 @@ import lombok.NoArgsConstructor;
 //@Builder
 public class Genre implements Serializable {
 
+    private static final long SerialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
