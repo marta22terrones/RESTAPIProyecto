@@ -15,6 +15,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +37,7 @@ public class Director implements Serializable {
     @Size(min = 2, max = 50, message = "The name must have between 2 and 50 characters")
     private String name;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "directors")
     @NotEmpty
     private List<Film> directorFilms = new ArrayList<Film>();

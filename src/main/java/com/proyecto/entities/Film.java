@@ -19,6 +19,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.Range;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,7 +49,8 @@ public class Film implements Serializable {
     private String title;
 
     // @NotEmpty(message = "The year cannot be empty")
-    @Size(min = 4, max = 4, message = "Please input a valid year")
+    @Range(min = 1, max = 2022, message = "Please input a valid year")
+    // @Size(min = 4, max = 4, message = "Please input a valid year")
     private int year;
 
     // @NotEmpty(message = "The plot cannot be empty")
@@ -54,21 +59,25 @@ public class Film implements Serializable {
 
     private String poster;
 
-    @Size(min = 2, max = 5, message = "Please input a valid length in minutes")
+    @Range(min = 1, max = 300, message = "Please input a valid length in minutes")
+    // @Size(min = 2, max = 5, message = "Please input a valid length in minutes")
     private int length;
 
+    @JsonIgnore
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "film_genre", joinColumns = @JoinColumn(name = "film_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
     @NotNull(message = "The movie must have at least one genre")
     @ElementCollection(targetClass = Genre.class)
     private List<Genre> genres = new ArrayList<Genre>();
 
+    @JsonIgnore
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "film_director", joinColumns = @JoinColumn(name = "film_id"), inverseJoinColumns = @JoinColumn(name = "director_id"))
     @NotNull(message = "The movie must have at least one director")
     @ElementCollection(targetClass = Director.class)
     private List<Director> directors = new ArrayList<Director>();
 
+    @JsonIgnore
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "film_actor", joinColumns = @JoinColumn(name = "film_id"), inverseJoinColumns = @JoinColumn(name = "actor_id"))
     @NotNull(message = "The movie must have at least one actor")

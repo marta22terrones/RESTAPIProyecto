@@ -22,4 +22,5 @@ public interface IFilmService {
     public List<Film> getFilmByString(String string);
     public List<Film> findAll(Sort sort);
     public Page<Film> findAll(Pageable pageable);
+    public Film saveFilm(Film film);
 }

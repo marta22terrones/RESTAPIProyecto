@@ -72,4 +72,9 @@ public class FilmServiceImpl implements IFilmService {
     public Page<Film> findAll(Pageable pageable) {
         return filmDao.findAll(pageable);
     }
+
+    @Override
+    public Film saveFilm(Film film) {
+        return filmDao.save(film);
+    }
 }

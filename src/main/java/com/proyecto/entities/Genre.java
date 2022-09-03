@@ -18,6 +18,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,6 +42,7 @@ public class Genre implements Serializable {
     @Size(min = 4, max = 20, message = "The genre name must have between 4 and 20 characters")
     private String name;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "genres")
     @NotEmpty(message = "You must have at least one film in this genre")
     private List<Film> genreFilms = new ArrayList<Film>();
