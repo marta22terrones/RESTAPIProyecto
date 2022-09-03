@@ -143,5 +143,62 @@ public class MainController {
         return responseEntity;
     }
 
+    // Modificar un producto existente
+    // Es practicamente igual al metodo insert
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> update(@PathVariable(name = "id") long id,
+            @Valid @RequestBody Film film, BindingResult result) {
 
+        Map<String, Object> responseAsMap = new HashMap<>();
+        ResponseEntity<Map<String, Object>> responseEntity = null;
+
+        List<String> errorMessages = new ArrayList<>();
+
+        // Primero: Comprobar si hay errores en el producto recibido
+        if (result.hasErrors()) {
+
+            // Recuperamos la lista de errores
+            List<ObjectError> errores = result.getAllErrors();
+
+            // Recorrer la lista de errores
+            for (ObjectError error : errores) {
+
+                // Añadimos los mensajes de error, que estan en la entidad, Producto en este
+                // caso
+                // a una lista
+                errorMessages.add(error.getDefaultMessage());
+            }
+
+            responseAsMap.put("errores", errorMessages);
+            responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.BAD_REQUEST);
+
+            return responseEntity;
+        }
+
+        // Si no hay errores podemos persistir el producto en la base de datos
+        try {
+            // Asociar el id del producto que se quiere modificar con el producto
+            film.setId((int) id);
+            Film filmDB = filmService.saveFilm(film);
+
+            if (filmDB != null) {
+                // Se ha actualizado el producto correctamente
+                responseAsMap.put("film", filmDB);
+                responseAsMap.put("mensaje",
+                        "El producto con id " + filmDB.getId() + ", se ha actualizado correctamente!!");
+                responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.OK);
+            } else {
+                // No se ha guardado correctamente el producto
+                responseAsMap.put("mensaje", "No se ha podido actualizar el producto");
+                responseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+        } catch (DataAccessException e) {
+            responseAsMap.put("mensaje", "Error grave en la actualizacion del producto, y la causa mas probable es: "
+                    + e.getMostSpecificCause());
+            responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return responseEntity;
+    }
 }
