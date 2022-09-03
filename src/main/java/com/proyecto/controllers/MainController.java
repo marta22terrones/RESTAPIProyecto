@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proyecto.entities.Film;
 import com.proyecto.service.IFilmService;
 
-/* Todas las peticiones se hacen a la URI "/productos" (end point), es decir, al recurso, y
+/* Todas las peticiones se hacen a la URI "/films" (end point), es decir, al recurso, y
  * en dependencia del verbo HTTP utilizado (GET, POST, PUT, PATCH, OPTIONS, etc)
  * se delegara a un metodo u otro.
  */
@@ -42,7 +42,7 @@ public class MainController {
     private IFilmService filmService;
 
     // El siguiente metodo tiene que responder a una request de tipo
-    // http://localhost:8080/productos?page=1&size=3
+    // http://localhost:8080/films?page=1&size=3
     @GetMapping
     public ResponseEntity<List<Film>> findAll(@RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "size", required = false) Integer size) {
@@ -50,7 +50,7 @@ public class MainController {
         List<Film> films = null;
         ResponseEntity<List<Film>> responseEntity = null;
 
-        // Ordenamos por el nombre del producto
+        // Ordenamos por el nombre de la film
         Sort sortById = Sort.by("id");
 
         // Comprobamos si en la request me estan enviando page y size
@@ -76,7 +76,7 @@ public class MainController {
     }
 
     // El siguiente metodo recupera un producto dado el ID que recibe como parametro
-    // http://localhost:8080/productos/3 (el 3 es el id del producto)
+    // http://localhost:8080/films/3 (el 3 es el id de la film)
     @GetMapping("/{id}")
     public ResponseEntity<Film> findById(@PathVariable(name = "id") Integer id) {
 
@@ -88,7 +88,7 @@ public class MainController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // Guardar (Persistir), un producto, con su presentacion en la base de datos
+    // Guardar (Persistir), una pelicula, con su presentacion en la base de datos
     @PostMapping
     public ResponseEntity<Map<String, Object>> insert(@Valid @RequestBody Film film, BindingResult result) {
 
@@ -97,53 +97,52 @@ public class MainController {
 
         List<String> errorMessages = new ArrayList<>();
 
-        // Primero: Comprobar si hay errores en el producto recibido
+        // Primero: Comprobar si hay errores en la pelicula recibida
         if (result.hasErrors()) {
 
             // Recuperamos la lista de errores
-            List<ObjectError> errores = result.getAllErrors();
+            List<ObjectError> errors = result.getAllErrors();
 
             // Recorrer la lista de errores
-            for (ObjectError error : errores) {
+            for (ObjectError error : errors) {
 
-                // Añadimos los mensajes de error, que estan en la entidad, Producto en este
-                // caso
-                // a una lista
+                // Añadimos los mensajes de error, que estan en la entidad, Film en este
+                // caso a una lista
                 errorMessages.add(error.getDefaultMessage());
             }
 
-            responseAsMap.put("errores", errorMessages);
+            responseAsMap.put("errors", errorMessages);
             responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.BAD_REQUEST);
 
             return responseEntity;
         }
 
-        // Si no hay errores podemos persistir el producto en la base de datos
+        // Si no hay errores podemos persistir la pelicula en la base de datos
         try {
             Film filmDB = filmService.saveFilm(film);
 
             if (filmDB != null) {
-                // Se ha guardado el producto correctamente
+                // Se ha guardado la pelicula correctamente
                 responseAsMap.put("film", filmDB);
-                responseAsMap.put("mensaje",
-                        "The film with id " + filmDB.getId() + ", has been created correctly!!");
+                responseAsMap.put("message",
+                        "The film with id " + filmDB.getId() + ", has been created correctly.");
                 responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.CREATED);
             } else {
-                // No se ha guardado correctamente el producto
-                responseAsMap.put("mensaje", "No se ha podido crear el film");
+                // No se ha guardado correctamente la pelicula
+                responseAsMap.put("message", "The film hasn't been created");
                 responseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
         } catch (DataAccessException e) {
-            responseAsMap.put("mensaje",
-                    "Error grave en la creacion del producto, y la causa mas probable es: " + e.getMostSpecificCause());
+            responseAsMap.put("message",
+                    "There has been a serious error during the creation of the film, and the most likely cause is: " + e.getMostSpecificCause());
             responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return responseEntity;
     }
 
-    // Modificar un producto existente
+    // Modificar una pelicula existente
     // Es practicamente igual al metodo insert
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable(name = "id") int id,
@@ -154,47 +153,46 @@ public class MainController {
 
         List<String> errorMessages = new ArrayList<>();
 
-        // Primero: Comprobar si hay errores en el producto recibido
+        // Primero: Comprobar si hay errores en la pelicula recibido
         if (result.hasErrors()) {
 
             // Recuperamos la lista de errores
-            List<ObjectError> errores = result.getAllErrors();
+            List<ObjectError> errors = result.getAllErrors();
 
             // Recorrer la lista de errores
-            for (ObjectError error : errores) {
+            for (ObjectError error : errors) {
 
-                // Añadimos los mensajes de error, que estan en la entidad, Producto en este
-                // caso
-                // a una lista
+                // Añadimos los mensajes de error, que estan en la entidad, Film en este
+                // caso a una lista
                 errorMessages.add(error.getDefaultMessage());
             }
 
-            responseAsMap.put("errores", errorMessages);
+            responseAsMap.put("errors", errorMessages);
             responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.BAD_REQUEST);
 
             return responseEntity;
         }
 
-        // Si no hay errores podemos persistir el producto en la base de datos
+        // Si no hay errores podemos persistir la pelicula en la base de datos
         try {
-            // Asociar el id del producto que se quiere modificar con el producto
+            // Asociar el id de la pelicula que se quiere modificar con la pelicula
             film.setId(id);
             Film filmDB = filmService.saveFilm(film);
 
             if (filmDB != null) {
-                // Se ha actualizado el producto correctamente
+                // Se ha actualizado la pelicula correctamente
                 responseAsMap.put("film", filmDB);
-                responseAsMap.put("mensaje",
-                        "El producto con id " + filmDB.getId() + ", se ha actualizado correctamente!!");
+                responseAsMap.put("message",
+                        "The film with id " + filmDB.getId() + ", has been updated correctly.");
                 responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.OK);
             } else {
-                // No se ha guardado correctamente el producto
-                responseAsMap.put("mensaje", "No se ha podido actualizar el producto");
+                // No se ha guardado correctamente la pelicula
+                responseAsMap.put("message", "It wasn't possible to update the film");
                 responseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
         } catch (DataAccessException e) {
-            responseAsMap.put("mensaje", "Error grave en la actualizacion del producto, y la causa mas probable es: "
+            responseAsMap.put("message", "There has been a serious error in the update of the film, and the most likely cause is: "
                     + e.getMostSpecificCause());
             responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -205,7 +203,7 @@ public class MainController {
     // Hay que hacer una columnita que el estatus sea archivado porque no se pueden
     // borrar las cosas en la vida real
     // Pero como esto es para aprender si que vamos a hacer un metodo que borre
-    // Borrar un producto
+    // Borrar una pelicula
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable(name = "id") int id) {
 
@@ -218,14 +216,14 @@ public class MainController {
 
             try {
                 filmService.delete(id);
-                responseAsMap.put("mensaje", "Este producto ha sido borrado correctamente" + film.getId());
+                responseAsMap.put("message", "This film has been deleted correctly: " + film.getId());
                 responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.OK);
             } catch (DataAccessException e) {
                 e.getMostSpecificCause();
             }
 
         } else {
-            responseAsMap.put("mensaje", "El producto no se ha podido eliminar");
+            responseAsMap.put("message", "It wasn't possible to delete the film");
             responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return responseEntity;
