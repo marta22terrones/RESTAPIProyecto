@@ -146,7 +146,7 @@ public class MainController {
     // Modificar un producto existente
     // Es practicamente igual al metodo insert
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable(name = "id") long id,
+    public ResponseEntity<Map<String, Object>> update(@PathVariable(name = "id") int id,
             @Valid @RequestBody Film film, BindingResult result) {
 
         Map<String, Object> responseAsMap = new HashMap<>();
@@ -178,7 +178,7 @@ public class MainController {
         // Si no hay errores podemos persistir el producto en la base de datos
         try {
             // Asociar el id del producto que se quiere modificar con el producto
-            film.setId((int) id);
+            film.setId(id);
             Film filmDB = filmService.saveFilm(film);
 
             if (filmDB != null) {
@@ -199,6 +199,35 @@ public class MainController {
             responseEntity = new ResponseEntity<>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+        return responseEntity;
+    }
+
+    // Hay que hacer una columnita que el estatus sea archivado porque no se pueden
+    // borrar las cosas en la vida real
+    // Pero como esto es para aprender si que vamos a hacer un metodo que borre
+    // Borrar un producto
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable(name = "id") int id) {
+
+        Film film = filmService.getFilm(id);
+
+        Map<String, Object> responseAsMap = new HashMap<>();
+        ResponseEntity<Map<String, Object>> responseEntity = null;
+
+        if (film != null) {
+
+            try {
+                filmService.delete(id);
+                responseAsMap.put("mensaje", "Este producto ha sido borrado correctamente" + film.getId());
+                responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.OK);
+            } catch (DataAccessException e) {
+                e.getMostSpecificCause();
+            }
+
+        } else {
+            responseAsMap.put("mensaje", "El producto no se ha podido eliminar");
+            responseEntity = new ResponseEntity<Map<String,Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return responseEntity;
     }
 }
