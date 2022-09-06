@@ -29,10 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proyecto.entities.Film;
 import com.proyecto.service.IFilmService;
 
-/* Todas las peticiones se hacen a la URI "/films" (end point), es decir, al recurso, y
- * en dependencia del verbo HTTP utilizado (GET, POST, PUT, PATCH, OPTIONS, etc)
- * se delegara a un metodo u otro.
- */
 
 @RestController
 @RequestMapping("/films")
@@ -41,8 +37,6 @@ public class MainController {
     @Autowired
     private IFilmService filmService;
 
-    // El siguiente metodo tiene que responder a una request de tipo
-    // http://localhost:8080/films?page=1&size=3
     @GetMapping
     public ResponseEntity<List<Film>> findAll(@RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "size", required = false) Integer size) {
@@ -50,19 +44,15 @@ public class MainController {
         List<Film> films = null;
         ResponseEntity<List<Film>> responseEntity = null;
 
-        // Ordenamos por el nombre de la film
         Sort sortById = Sort.by("id");
 
-        // Comprobamos si en la request me estan enviando page y size
         if (page != null && size != null) {
 
-            // Con paginacion
             Pageable pageable = PageRequest.of(page, size, sortById);
 
             films = filmService.findAll(pageable).getContent();
 
         } else {
-            // Sin paginacion
             films = filmService.findAll(sortById);
         }
 
@@ -75,8 +65,6 @@ public class MainController {
         return responseEntity;
     }
 
-    // El siguiente metodo recupera un producto dado el ID que recibe como parametro
-    // http://localhost:8080/films/3 (el 3 es el id de la film)
     @GetMapping("/{id}")
     public ResponseEntity<Film> findById(@PathVariable(name = "id") Integer id) {
 
@@ -88,7 +76,6 @@ public class MainController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // Guardar (Persistir), una pelicula, con su presentacion en la base de datos
     @PostMapping
     public ResponseEntity<Map<String, Object>> insert(@Valid @RequestBody Film film, BindingResult result) {
 
@@ -97,17 +84,12 @@ public class MainController {
 
         List<String> errorMessages = new ArrayList<>();
 
-        // Primero: Comprobar si hay errores en la pelicula recibida
         if (result.hasErrors()) {
 
-            // Recuperamos la lista de errores
             List<ObjectError> errors = result.getAllErrors();
 
-            // Recorrer la lista de errores
             for (ObjectError error : errors) {
 
-                // Añadimos los mensajes de error, que estan en la entidad, Film en este
-                // caso a una lista
                 errorMessages.add(error.getDefaultMessage());
             }
 
@@ -117,18 +99,15 @@ public class MainController {
             return responseEntity;
         }
 
-        // Si no hay errores podemos persistir la pelicula en la base de datos
         try {
             Film filmDB = filmService.saveFilm(film);
 
             if (filmDB != null) {
-                // Se ha guardado la pelicula correctamente
                 responseAsMap.put("film", filmDB);
                 responseAsMap.put("message",
                         "The film with id " + filmDB.getId() + ", has been created correctly.");
                 responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.CREATED);
             } else {
-                // No se ha guardado correctamente la pelicula
                 responseAsMap.put("message", "The film hasn't been created");
                 responseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -142,8 +121,6 @@ public class MainController {
         return responseEntity;
     }
 
-    // Modificar una pelicula existente
-    // Es practicamente igual al metodo insert
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> update(@PathVariable(name = "id") int id,
             @Valid @RequestBody Film film, BindingResult result) {
@@ -153,17 +130,12 @@ public class MainController {
 
         List<String> errorMessages = new ArrayList<>();
 
-        // Primero: Comprobar si hay errores en la pelicula recibido
         if (result.hasErrors()) {
 
-            // Recuperamos la lista de errores
             List<ObjectError> errors = result.getAllErrors();
 
-            // Recorrer la lista de errores
             for (ObjectError error : errors) {
 
-                // Añadimos los mensajes de error, que estan en la entidad, Film en este
-                // caso a una lista
                 errorMessages.add(error.getDefaultMessage());
             }
 
@@ -173,20 +145,16 @@ public class MainController {
             return responseEntity;
         }
 
-        // Si no hay errores podemos persistir la pelicula en la base de datos
         try {
-            // Asociar el id de la pelicula que se quiere modificar con la pelicula
             film.setId(id);
             Film filmDB = filmService.saveFilm(film);
 
             if (filmDB != null) {
-                // Se ha actualizado la pelicula correctamente
                 responseAsMap.put("film", filmDB);
                 responseAsMap.put("message",
                         "The film with id " + filmDB.getId() + ", has been updated correctly.");
                 responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.OK);
             } else {
-                // No se ha guardado correctamente la pelicula
                 responseAsMap.put("message", "It wasn't possible to update the film");
                 responseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
@@ -199,11 +167,7 @@ public class MainController {
 
         return responseEntity;
     }
-
-    // Hay que hacer una columnita que el estatus sea archivado porque no se pueden
-    // borrar las cosas en la vida real
-    // Pero como esto es para aprender si que vamos a hacer un metodo que borre
-    // Borrar una pelicula
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable(name = "id") int id) {
 
